@@ -1,0 +1,57 @@
+name: Sincronizar planilha e publicar relatório
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # a cada 15 minutos
+  workflow_dispatch:          # botão "Run workflow" no GitHub
+  repository_dispatch:        # gatilho instantâneo vindo do Google Sheets (Apps Script)
+    types: [planilha-editada]
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: relatorio
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Baixar planilha
+        id: sync
+        run: bash scripts/sync-planilha.sh
+
+      - name: Commitar alterações
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "kophos-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/planilha.csv data/meta.json
+          git commit -m "Atualiza dados da planilha"
+          git push
+
+      - name: Preparar site
+        if: steps.sync.outputs.changed == 'true' || github.event_name != 'schedule'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true' || github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

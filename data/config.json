@@ -1,0 +1,20 @@
+{
+  "_comentario": "Informações que NÃO estão na planilha. Os demais números do relatório são calculados automaticamente a partir de data/planilha.csv.",
+  "titulo": "Novo Testamento em Libras",
+  "subtitulo": "Relatório de tradução — Projeto Bíblia TPS",
+  "publico": "Relatório para financiadores e prestação de contas",
+  "planilhaUrl": "https://docs.google.com/spreadsheets/d/1_5r5Iv9iSHfSa_QAIrfOwk5I9neJB-CSFZ3NwRKpN4U/edit?usp=sharing",
+  "inicioFormal": "2019-01-11",
+  "encerramentoNT": "2023-10-10",
+  "lancamentoGeral": null,
+  "tradutoresPorPolo": 2,
+  "equipe": [
+    { "frente": "Tradução", "pessoas": 12, "composicao": "8 surdos tradutores (2 por polo) e 4 intérpretes facilitadores" },
+    { "frente": "Validação", "pessoas": 6, "composicao": "2 teólogos + 3 surdos que não estavam na tradução + 1 intérprete facilitador CODA" },
+    { "frente": "Glossário", "pessoas": 3, "composicao": "1 surdo coordenador + 1 surdo assistente + 1 teólogo intérprete" }
+  ],
+  "observacoes": [
+    "O trabalho dos 4 polos não foi concomitante durante todo o período. Em alguns períodos/livros houve 5 polos e em outros mais de 2 surdos por polo.",
+    "Os valores foram arredondados sempre para mais."
+  ]
+}

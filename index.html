@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório de Tradução — Kophós</title>
+  <meta name="description" content="Novo Testamento em Libras — relatório de tradução do Projeto Bíblia TPS, Missão Kophós.">
+  <link rel="icon" href="assets/sol.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="wrap topo__in">
+      <a href="#" class="topo__logo"><img src="assets/logo-kophos.png" alt="Missão Kophós — o reino acessível" width="845" height="225"></a>
+      <nav class="topo__nav" aria-label="Seções">
+        <a href="#numeros">Números</a>
+        <a href="#tempo">Linha do tempo</a>
+        <a href="#equipe">Equipe</a>
+        <a href="#produtividade">Produtividade</a>
+        <a href="#livros">Livros</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero__in">
+        <div class="hero__txt">
+          <p class="kicker" data-bind="subtitulo">Relatório de tradução — Projeto Bíblia TPS</p>
+          <h1 data-bind="titulo">Novo Testamento em Libras</h1>
+          <p class="espacado">o reino acessível</p>
+          <p class="hero__pub" data-bind="publico"></p>
+        </div>
+        <div class="hero__sol" aria-hidden="true" data-sol></div>
+      </div>
+      <div class="wrap">
+        <dl class="kpis" id="numeros">
+          <div><dt>Livros</dt><dd data-k="livros">—</dd></div>
+          <div><dt>Capítulos</dt><dd data-k="capitulos">—</dd></div>
+          <div><dt>Versículos</dt><dd data-k="versiculos">—</dd></div>
+          <div><dt>Meses de tradução</dt><dd data-k="meses">—</dd></div>
+          <div><dt>Polos</dt><dd data-k="polos">—</dd></div>
+          <div><dt>Pessoas</dt><dd data-k="pessoas">—</dd></div>
+        </dl>
+        <p class="ritmo" data-k="ritmoFrase"></p>
+      </div>
+    </section>
+
+    <section class="secao" id="tempo">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">01</span><h2>Linha do tempo</h2></header>
+        <ol class="marcos" data-marcos></ol>
+        <p class="texto" data-k="prazoFrase"></p>
+        <h3>Tradução de cada livro</h3>
+        <div class="legenda" data-legenda-polos></div>
+        <div class="gantt" data-gantt></div>
+        <p class="nota">Barras = período de tradução (mês inicial e final contados). ◆ = lançamento do livro.</p>
+      </div>
+    </section>
+
+    <section class="secao secao--escura" id="equipe">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">02</span><h2>Equipe e estrutura</h2></header>
+        <div class="equipe" data-equipe></div>
+        <p class="texto" data-k="equipeFrase"></p>
+        <h3>Polos de tradução</h3>
+        <div class="polos" data-polos></div>
+        <p class="texto" data-k="polosFrase"></p>
+      </div>
+    </section>
+
+    <section class="secao" id="duracao">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">03</span><h2>Tempo de tradução por livro</h2></header>
+        <p class="texto" data-k="duracaoFrase"></p>
+        <p class="texto" data-k="volumeFrase"></p>
+        <div class="barras" data-barras-duracao></div>
+      </div>
+    </section>
+
+    <section class="secao secao--areia" id="produtividade">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">04</span><h2>Versículos por mês por polo</h2></header>
+        <p class="texto" data-k="poloFrase"></p>
+        <p class="texto" data-k="homogeneoFrase"></p>
+        <div class="legenda" data-legenda-polos style="margin-top:24px"></div>
+        <div class="barras barras--ref" data-barras-polo></div>
+
+        <aside class="explica">
+          <h3>Como ler a média ponderada</h3>
+          <div data-explica></div>
+        </aside>
+
+        <header class="secao__cab secao__cab--sub"><span class="num">05</span><h2>Por surdo tradutor</h2></header>
+        <p class="texto" data-k="tradutorFrase"></p>
+        <p class="destaque" data-k="praticaFrase"></p>
+      </div>
+    </section>
+
+    <section class="secao" id="livros">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">06</span><h2>Quadro por livro</h2></header>
+        <p class="nota">Clique no título de uma coluna para ordenar.</p>
+        <div class="tabela-rolagem"><table class="tabela" data-tabela></table></div>
+      </div>
+    </section>
+
+    <section class="secao secao--escura" id="obs">
+      <div class="wrap">
+        <header class="secao__cab"><span class="num">07</span><h2>Observações</h2></header>
+        <ol class="obs" data-obs></ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="wrap rodape__in">
+      <p><strong>Projeto Bíblia TPS</strong> — Novo Testamento em Libras · Missão Kophós</p>
+      <p class="rodape__fonte">Dados: <a data-planilha href="#" target="_blank" rel="noopener">planilha de acompanhamento</a> · <span data-sync>sincronização automática</span></p>
+    </div>
+  </footer>
+
+  <p class="erro" data-erro hidden></p>
+  <script src="assets/app.js"></script>
+</body>
+</html>
