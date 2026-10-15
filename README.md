@@ -6,11 +6,11 @@ Página do relatório do Projeto Bíblia TPS, gerada automaticamente a partir da
 ## Como a atualização automática funciona
 
 ```
-Google Sheets ──(a cada 15 min, ou na hora via Apps Script)──▶ GitHub Action
+Google Sheets ──(a cada 5 min)──▶ GitHub Action
       └─ baixa CSV → data/planilha.csv → commit → publica no GitHub Pages
 ```
 
-- **`.github/workflows/sync.yml`** — roda a cada 15 minutos. Se a planilha mudou,
+- **`.github/workflows/sync.yml`** — roda a cada 5 minutos. Se a planilha mudou,
   commita `data/planilha.csv` e republica o site.
 - **Todos os números** (totais, médias simples e ponderadas, extremos, gráficos,
   frases do texto) são recalculados no navegador a partir do CSV (`assets/app.js`).
