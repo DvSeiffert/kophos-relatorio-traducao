@@ -177,27 +177,9 @@
   /* ---------- renderização ---------- */
   const set = (key, html) => $$(`[data-k="${key}"]`).forEach((el) => (el.innerHTML = html));
 
-  function sol(el) {
-    // Sol do logotipo: círculo laranja com raios brancos partindo de um ponto à esquerda.
-    const cx = 40, cy = 50;
-    const raios = [
-      [0, 46], [14, 44], [-14, 44], [28, 42], [-28, 42], [42, 40], [-42, 40], [56, 38], [-56, 38],
-      [70, 36], [-70, 36], [86, 36], [-86, 36], [180, 24], [150, 18], [-150, 18], [118, 22], [-118, 22],
-    ];
-    const linhas = raios.map(([ang, len], i) => {
-      const r = (ang * Math.PI) / 180;
-      const x1 = cx + Math.cos(r) * 7, y1 = cy + Math.sin(r) * 7;
-      const x2 = cx + Math.cos(r) * len, y2 = cy + Math.sin(r) * len;
-      const w = i % 2 ? 3.2 : 4;
-      return `<line class="raio" style="animation-delay:${i * 40}ms" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke-width="${w}"/>`;
-    }).join("");
-    el.innerHTML = `<svg viewBox="0 0 100 100" role="img"><circle cx="50" cy="50" r="50" fill="#E28531"/><clipPath id="c"><circle cx="50" cy="50" r="47"/></clipPath><g clip-path="url(#c)" stroke="#fff">${linhas}</g></svg>`;
-  }
-
   function render(L, cfg, meta) {
     const k = calcula(L, cfg);
     ["titulo", "subtitulo", "publico"].forEach((c) => cfg[c] && $$(`[data-bind="${c}"]`).forEach((el) => (el.textContent = c === "subtitulo" ? cfg[c] + " · Kophós" : cfg[c])));
-    $$("[data-sol]").forEach(sol);
 
     set("livros", fmt(k.livros));
     set("capitulos", fmt(k.capitulos));
