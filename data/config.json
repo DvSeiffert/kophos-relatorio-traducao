@@ -1,7 +1,7 @@
 {
   "_comentario": "Informações que NÃO estão na planilha. Os demais números do relatório são calculados automaticamente a partir de data/planilha.csv.",
   "titulo": "Novo Testamento em Libras",
-  "subtitulo": "Relatório de tradução — Projeto Bíblia TPS",
+  "subtitulo": "Relatório de Tradução - Projeto Bíblia TPS - Missão Kophós",
   "planilhaUrl": "https://docs.google.com/spreadsheets/d/1_5r5Iv9iSHfSa_QAIrfOwk5I9neJB-CSFZ3NwRKpN4U/edit?usp=sharing",
   "inicioFormal": "2019-01-11",
   "encerramentoNT": "2023-10-10",

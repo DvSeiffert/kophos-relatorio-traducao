@@ -179,7 +179,7 @@
 
   function render(L, cfg, meta) {
     const k = calcula(L, cfg);
-    ["titulo", "subtitulo"].forEach((c) => cfg[c] && $$(`[data-bind="${c}"]`).forEach((el) => (el.textContent = c === "subtitulo" ? cfg[c] + " · Kophós" : cfg[c])));
+    ["titulo", "subtitulo"].forEach((c) => cfg[c] && $$(`[data-bind="${c}"]`).forEach((el) => (el.textContent = cfg[c])));
 
     set("livros", fmt(k.livros));
     set("capitulos", fmt(k.capitulos));
