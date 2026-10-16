@@ -145,6 +145,8 @@
     const um = L.filter((b) => b.polos === 1), varios = L.filter((b) => b.polos > 1);
     k.mediaUm = um.length ? soma(um, (b) => b.porPolo) / um.length : 0;
     k.mediaVarios = varios.length ? soma(varios, (b) => b.porPolo) / varios.length : 0;
+    k.pondUm = um.length ? soma(um, (b) => b.vers) / soma(um, (b) => b.dur * b.polos) : 0;
+    k.pondVarios = varios.length ? soma(varios, (b) => b.vers) / soma(varios, (b) => b.dur * b.polos) : 0;
     k.minPolosVarios = varios.length ? Math.min(...varios.map((b) => b.polos)) : 0;
     k.maxPolos = Math.max(...L.map((b) => b.polos));
 
@@ -169,8 +171,8 @@
     k.menor = L.reduce((a, b) => (b.vers < a.vers ? b : a));
     k.maior = L.reduce((a, b) => (b.vers > a.vers ? b : a));
 
-    k.equipe = cfg.equipe || [];
-    k.pessoas = soma(k.equipe, (e) => e.pessoas);
+    k.areas = (cfg.equipe || []).map((a) => ({ ...a, total: soma(a.frentes || [], (e) => e.pessoas) }));
+    k.pessoas = soma(k.areas, (a) => a.total);
     return k;
   }
 
@@ -180,71 +182,92 @@
   function render(L, cfg, meta) {
     const k = calcula(L, cfg);
     ["titulo", "subtitulo"].forEach((c) => cfg[c] && $$(`[data-bind="${c}"]`).forEach((el) => (el.textContent = cfg[c])));
+    const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
 
     set("livros", fmt(k.livros));
     set("capitulos", fmt(k.capitulos));
     set("versiculos", fmt(k.versiculos));
-    set("meses", fmt(k.meses));
-    set("polos", fmt(k.nPolos));
-    set("pessoas", fmt(k.pessoas));
-    set("ritmoFrase", `Ritmo médio do projeto: <strong>cerca de ${fmt(Math.round(k.ritmo))} versículos por mês</strong> ao longo dos ${k.meses} meses de tradução (${fmt(k.versiculos)} ÷ ${k.meses}).`);
 
-    // Linha do tempo
+    // 1. O projeto em números
+    $("[data-indicadores]").innerHTML = [
+      ["Livros traduzidos", fmt(k.livros)],
+      ["Capítulos", fmt(k.capitulos)],
+      ["Versículos", fmt(k.versiculos)],
+      ["Duração da tradução", `${k.meses} meses`, anosMeses(k.meses)],
+      ["Polos de tradução", fmt(k.nPolos), lista(k.polosLista)],
+      ["Equipe total", `${k.pessoas} pessoas`, k.areas.map((a) => `${a.total} na ${a.area.toLowerCase()}`).join(" · ")],
+    ].map(([n, v, d]) => `<div><dt>${n}</dt><dd>${v}</dd>${d ? `<span>${esc(d)}</span>` : ""}</div>`).join("");
+
+    // 2. Linha do tempo
     $("[data-marcos]").innerHTML = [
       ["Início formal", k.inicio, "Início da tradução"],
-      ["Encerramento do NT", k.encerramento, `Sem consultoria · ${k.meses} meses (${anosMeses(k.meses)})`],
+      ["Encerramento do NT (sem consultoria)", k.encerramento, `${k.meses} meses (${anosMeses(k.meses)})`],
       ["Lançamento geral", k.lancGeral, k.mesesLanc ? `${k.mesesLanc} meses do início (${anosMeses(k.mesesLanc)})` : ""],
     ].map(([n, d, det]) => `<li><span class="marco__nome">${n}</span><span class="marco__data">${dataBR(d)}</span><span class="marco__det">${esc(det)}</span></li>`).join("");
-    set("prazoFrase", `O início formal foi em ${dataBR(k.inicio)}, e o encerramento do Novo Testamento (sem consultoria) em ${dataBR(k.encerramento)} — ${k.meses} meses, ou ${anosMeses(k.meses)}.` +
-      (k.lancGeral ? ` Até o lançamento geral, em ${dataBR(k.lancGeral)}, decorreram ${k.mesesLanc} meses (${anosMeses(k.mesesLanc)}).` : "") +
-      (k.pendentes.length ? ` Sem data de lançamento na planilha: ${lista(k.pendentes)}.` : ""));
+    set("ritmoFrase", `Ritmo médio do projeto: <strong>cerca de ${fmt(Math.round(k.ritmo))} versículos por mês</strong> ao longo dos ${k.meses} meses de tradução. Cerca de <strong>${fmt(Math.round(k.ritmo / k.nPolos))} versículos por polo por mês</strong>.`);
 
-    const qtds = Object.keys(k.porQtdPolos).map(Number).sort((a, b) => a - b);
-    const leg = qtds.map((q) => `<span><i style="background:${COR_POLOS[q] || "#999"}"></i>${q} ${q === 1 ? "polo" : "polos"}</span>`).join("");
-    $$("[data-legenda-polos]").forEach((el) => (el.innerHTML = leg));
-    gantt(L);
+    // 3. Equipe e estrutura
+    $("[data-equipe]").innerHTML = k.areas.map((a) => `
+      <div class="area">
+        <div class="area__cab"><h3>${esc(a.area)}</h3><span class="area__total"><b>${a.total}</b> pessoas · ${esc(a.resumo || "")}</span></div>
+        <div class="equipe" style="--n:${a.frentes.length}">${a.frentes.map((e) => `<div><span class="equipe__frente">${esc(e.frente)}</span><span class="equipe__n">${e.pessoas}<small>${e.pessoas === 1 ? "pessoa" : "pessoas"}</small></span><p class="equipe__c">${esc(e.composicao)}</p></div>`).join("")}</div>
+      </div>`).join("") +
+      `<div class="total-geral"><span class="equipe__frente">Total geral</span><span class="equipe__n">${k.pessoas}<small>pessoas envolvidas no projeto</small></span></div>`;
 
-    // Equipe
-    $("[data-equipe]").innerHTML = k.equipe.map((e) => `<div><span class="equipe__frente">${esc(e.frente)}</span><span class="equipe__n">${e.pessoas}<small>pessoas</small></span><p class="equipe__c">${esc(e.composicao)}</p></div>`).join("") +
-      `<div class="total"><span class="equipe__frente">Total</span><span class="equipe__n">${k.pessoas}<small>pessoas</small></span><p class="equipe__c">${lista(k.equipe.map((e) => e.frente.toLowerCase()))}</p></div>`;
-    const trad = k.equipe.find((e) => norm(e.frente) === "traducao");
-    const outras = k.equipe.filter((e) => e !== trad);
-    set("equipeFrase", `O projeto contou com ${k.nPolos} polos de tradução (${lista(k.polosLista)})` +
-      (trad ? `, reunindo ${trad.pessoas} pessoas — ${esc(trad.composicao)}` : "") +
-      (outras.length ? `. Somando-se as equipes de ${lista(outras.map((e) => `${e.frente.toLowerCase()} (${e.pessoas} pessoas)`))}, a equipe total foi de ${k.pessoas} pessoas.` : "."));
-
+    // 4. Quantidade de polos
     $("[data-polos]").innerHTML = k.polosLista.map((p) => {
       const ls = k.livrosPorPolo[p];
       return `<div class="polo"><b>${esc(p)}</b><span>participou de ${ls.length} livros</span><div class="polo__mini">${ls.map((b) => `<i title="${esc(b.livro)}"></i>`).join("")}</div></div>`;
     }).join("");
-    set("polosFrase", "Por livro, " + lista(qtds.map((q) => {
+    const fim = k.areas[0], meio = k.areas.slice(1);
+    const trad = fim ? fim.frentes.find((e) => norm(e.frente) === "traducao") : null;
+    const outras = fim ? fim.frentes.filter((e) => e !== trad) : [];
+    set("polosFrase", `O projeto contou com ${k.nPolos} polos de tradução (${lista(k.polosLista)})` +
+      (trad ? `, reunindo ${trad.pessoas} pessoas, sendo ${k.nPolos * k.tpp} surdos tradutores, com ${k.tpp} por polo, e ${trad.pessoas - k.nPolos * k.tpp} intérpretes facilitadores` : "") +
+      (outras.length ? `. Somando-se as equipes de ${lista(outras.map((e) => `${e.frente.toLowerCase()} (${e.pessoas} pessoas)`))}, a equipe diretamente envolvida com a tradução foi de ${fim.total} pessoas.` : ".") +
+      (cfg.textoPolos ? " " + esc(cfg.textoPolos) : "") +
+      (meio.length ? ` Além das pessoas diretamente envolvidas com a finalidade do projeto (tradução), tivemos o trabalho de outras ${soma(meio, (a) => a.total)} pessoas responsáveis pela gestão e administração do projeto.` : ""));
+
+    // 5. Prazo
+    set("prazoFrase", `O início formal foi em ${dataBR(k.inicio)}, e o encerramento do Novo Testamento (sem consultoria) em ${dataBR(k.encerramento)} — ${k.meses} meses, ou ${anosMeses(k.meses)}.` +
+      (k.lancGeral ? ` Até o lançamento geral, em ${dataBR(k.lancGeral)}, decorreram ${k.mesesLanc} meses (${anosMeses(k.mesesLanc)}).` : ""));
+    set("ritmoConta", `Ritmo médio: ${fmt(k.versiculos)} versículos ÷ ${k.meses} meses ≈ <strong>${fmt(Math.round(k.ritmo))} versículos/mês</strong>.`);
+    const qtds = Object.keys(k.porQtdPolos).map(Number).sort((a, b) => a - b);
+    const leg = qtds.map((q) => `<span><i style="background:${COR_POLOS[q] || "#999"}"></i>${pl(q, "polo", "polos")}</span>`).join("");
+    $$("[data-legenda-polos]").forEach((el) => (el.innerHTML = leg));
+    gantt(L);
+
+    // 6. Tempo de tradução por livro
+    $("[data-atividades]").innerHTML = qtds.map((q) => {
       const ns = k.porQtdPolos[q];
-      return `${ns.length} ${ns.length === 1 ? "livro foi traduzido" : "livros foram traduzidos"} por ${q} ${q === 1 ? "polo" : "polos"}` + (q > 1 ? ` (${lista(ns)})` : "");
-    })) + ".");
+      return `<li><b>${ns.length}</b> ${ns.length === 1 ? "livro" : "livros"} ${q === 1 ? "traduzidos por 1 polo individualmente" : `por ${q} polos conjuntamente (${lista(ns)})`}</li>`;
+    }).join("");
+    set("duracaoFrase", `O tempo de tradução por livro variou de ${k.dur.min} meses nos livros de ${lista(k.dur.minN)} a ${k.dur.max} meses, em ${lista(k.dur.maxN)}. <strong>A média do projeto foi de ${fmt(Math.round(k.mediaMesesLivro))} meses por livro.</strong>`);
+    const rapido = k.maiorVol, lento = k.lentoVarios ? L.find((b) => b.livro === k.lentoVarios.minN[0]) : null;
+    $("[data-comparativo]").innerHTML = [
+      rapido && ["Mais rápido", rapido, `${fmt(rapido.vers)} versículos em ${rapido.dur} meses, com ${pl(rapido.polos, "polo", "polos")}`],
+      lento && ["Mais lento em ritmo", lento, `${fmt(lento.vers)} versículos em ${lento.dur} meses, com ${pl(lento.polos, "polo", "polos")}`],
+    ].filter(Boolean).map(([t, b, d]) => `<div class="comp"><span class="equipe__frente">${t}</span><b>${esc(b.livro)}</b><span class="comp__n">${fmt(b.media)}<small>vers./mês</small></span><p>${d}</p></div>`).join("");
+    set("experiencia", esc(cfg.textoExperiencia || ""));
+    barras($("[data-barras-duracao]"), [...L].sort((a, b) => b.dur - a.dur), (b) => b.dur, (b) => `${b.dur} m`, (b) => `${b.livro}: ${b.iniTxt} a ${b.fimTxt}`, (b) => COR_POLOS[b.polos]);
 
-    // Duração
-    set("duracaoFrase", `O tempo de tradução por livro variou de ${k.dur.min} meses (${lista(k.dur.minN)}) a ${k.dur.max} meses (${lista(k.dur.maxN)}). A média do projeto foi de ${fmt(k.livroMeses)} livro-meses ÷ ${k.livros} livros ≈ <strong>${fmt1(k.mediaMesesLivro)} meses por livro</strong>. Conta-se o mês inicial e o mês final em todos os livros.`);
-    set("volumeFrase", k.maiorVol ? `${esc(k.maiorVol.livro)} teve o maior volume mensal (${fmt(k.maiorVol.vers)} versículos em ${k.maiorVol.dur} meses, com ${k.maiorVol.polos} ${k.maiorVol.polos === 1 ? "polo" : "polos"} = ${fmt(k.maiorVol.media)} vers./mês)` +
-      (k.lentoVarios ? `; entre os livros com mais de um polo, ${lista(k.lentoVarios.minN)} teve o ritmo mais lento (${fmt(k.lentoVarios.min)} vers./mês).` : ".") : "");
-    barras($("[data-barras-duracao]"), [...L].sort((a, b) => b.dur - a.dur), (b) => b.dur, (b) => `${b.dur} m`, (b) => `${b.livro}: ${b.iniTxt} a ${b.fimTxt}`);
-
-    // Produtividade
-    set("poloFrase", `A produtividade por polo variou de ${fmt(k.pp.min)} (${lista(k.pp.minN)}) a ${fmt(k.pp.max)} (${lista(k.pp.maxN)}) versículos por mês. A média simples dos ${k.livros} livros é de aproximadamente <strong>${fmt1(k.simplesPolo)}</strong> vers./mês/polo; a média ponderada — ${fmt(k.versiculos)} ÷ ${fmt(k.poloMes)} polo-mês — é de aproximadamente <strong>${fmt1(k.ponderadaPolo)}</strong>.`);
-    set("homogeneoFrase", `Livros de 1 polo tiveram média de ~${fmt(Math.round(k.mediaUm))} vers./mês/polo; livros de ${k.minPolosVarios}–${k.maxPolos} polos, ~${fmt(Math.round(k.mediaVarios))}.`);
+    // 7. Versículos por mês por polo
+    set("poloFrase", `A produtividade por polo variou de ${fmt(k.pp.min)} versículos por mês em ${lista(k.pp.minN)} a ${fmt(k.pp.max)} versículos por mês em ${lista(k.pp.maxN)}. A média simples dos ${k.livros} livros é de aproximadamente <strong>${fmt1(k.simplesPolo)}</strong> vers./mês/polo; a média ponderada é de aproximadamente <strong>${fmt1(k.ponderadaPolo)}</strong>.`);
+    const cmp = k.pondUm >= k.pondVarios ? "um pouco maior" : "um pouco menor";
+    set("homogeneoFrase", `A produtividade por polo foi ${cmp} em livros traduzidos por apenas 1 polo (média de ${fmt(Math.round(k.pondUm))} vers/mês) do que em livros traduzidos por ${k.minPolosVarios} ou ${k.maxPolos} polos conjuntamente (média de ${fmt(Math.round(k.pondVarios))} vers/mês). <span class="nota">Médias ponderadas pelo esforço em polo-mês.</span>`);
     barras($("[data-barras-polo]"), [...L].sort((a, b) => b.porPolo - a.porPolo), (b) => b.porPolo, (b) => fmt(b.porPolo), (b) => `${b.livro}: ${fmt(b.vers)} vers. em ${b.dur} meses com ${b.polos} polo(s)`, (b) => COR_POLOS[b.polos],
       [{ v: k.ponderadaPolo, rot: `ponderada ${fmt1(k.ponderadaPolo)}`, cls: "ponderada" }, { v: k.simplesPolo, rot: `simples ${fmt1(k.simplesPolo)}`, cls: "simples" }]);
-
     $("[data-explica]").innerHTML = `
-      <p>A <strong>média simples</strong> dos ${k.livros} valores da coluna dá ~${fmt1(k.simplesPolo)} — mas trata todos os livros como iguais: ${esc(k.menor.livro)} (${fmt(k.menor.vers)} versículos) pesa o mesmo que ${esc(k.maior.livro)} (${fmt(k.maior.vers)}). Livros pequenos têm médias altas e inflam o resultado.</p>
-      <p>A <strong>média ponderada</strong> usa o volume real de trabalho como peso: ${fmt(k.poloMes)} = soma de (meses × polos) dos ${k.livros} livros = esforço total em polo-mês.</p>
-      <p class="formula">${fmt(k.versiculos)} ÷ ${fmt(k.poloMes)} ≈ ${fmt1(k.ponderadaPolo)} versículos por polo por mês</p>
-      <p>É a métrica correta para planejamento e prestação de contas: responde à pergunta “se eu abrir um novo polo, quantos versículos posso esperar dele por mês?” (orçamento, prazo, proposta a financiadores). A média simples (${fmt1(k.simplesPolo)}) é útil para comparar livros entre si; a ponderada é a correta para planejar capacidade e prever prazos.</p>`;
+      <p>A <strong>média simples</strong> da produtividade dos polos na tradução dos ${k.livros} livros do NT é de ${fmt1(k.simplesPolo)} vers/mês/polo. Mas trata todos os livros como iguais: ${esc(k.menor.livro)} (${fmt(k.menor.vers)} versículos) pesa o mesmo que ${esc(k.maior.livro)} (${fmt(k.maior.vers)}). Livros pequenos têm médias altas e inflam o resultado.</p>
+      <p>Por isso, é importante observar também a <strong>média ponderada</strong>, que usa o volume real de trabalho como peso: ${fmt(k.poloMes)} = soma de (meses × polos) dos ${k.livros} livros = esforço total em polo-mês.</p>
+      <p class="formula">${fmt(k.versiculos)} ÷ ${fmt(k.poloMes)} ≈ ${fmt1(k.ponderadaPolo)} = produtividade real média por polo</p>
+      <p>A média ponderada é a métrica mais adequada para planejamento e prestação de contas: responde à pergunta “se eu abrir um novo polo, quantos versículos posso esperar dele por mês?” (orçamento, prazo, proposta a financiadores). A média simples (${fmt1(k.simplesPolo)}) é útil para comparar livros entre si; a ponderada é a correta para planejar capacidade e prever prazos.</p>`;
 
-    set("tradutorFrase", `Considerando ${k.tpp} surdos tradutores por polo, a variação foi de ${fmt(k.pt.min)} (${lista(k.pt.minN)}) a ${fmt(k.pt.max)} (${lista(k.pt.maxN)}) versículos por mês. A média simples é de aproximadamente <strong>${fmt1(k.simplesTrad)}</strong> vers./mês/tradutor; a ponderada, de aproximadamente <strong>${fmt1(k.ponderadaTrad)}</strong>.`);
+    // 8. Por surdo tradutor
+    set("tradutorFrase", `Considerando ${k.tpp} surdos tradutores por polo, a variação foi de ${fmt(k.pt.min)} vers/mês/trad em ${lista(k.pt.minN)} a ${fmt(k.pt.max)} vers/mês/trad em ${lista(k.pt.maxN)}. A média simples é de aproximadamente <strong>${fmt1(k.simplesTrad)}</strong> vers/mês/trad; a ponderada, de aproximadamente <strong>${fmt1(k.ponderadaTrad)}</strong> vers/mês/trad.`);
     set("praticaFrase", esc(cfg.frasePratica || ""));
 
     tabela(L, k);
-    $("[data-obs]").innerHTML = (cfg.observacoes || []).map((o) => `<li>${esc(o)}</li>`).join("");
     $("[data-planilha]").href = cfg.planilhaUrl || "#";
     if (meta && meta.sincronizadoEm) {
       const d = new Date(meta.sincronizadoEm);

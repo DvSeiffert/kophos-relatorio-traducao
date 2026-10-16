@@ -31,7 +31,7 @@ a { color: inherit; }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
 /* Tipografia larga, como o logotipo */
-h1, h2, .kpis dd, .num, .equipe__n, .marco__data {
+h1, h2, .kpis dd, .num, .equipe__n, .marco__data, .indicadores dd, .comp b, .comp__n {
   font-stretch: 125%;
   font-weight: 900;
   letter-spacing: -0.01em;
@@ -69,6 +69,8 @@ h3 { font-stretch: 112%; font-weight: 800; font-size: 1.15rem; margin: 2.4rem 0 
 .kpis dd { margin: 0; font-size: clamp(1.8rem, 3.6vw, 2.9rem); font-variant-numeric: tabular-nums; }
 .kpis dt { font-size: 0.72rem; letter-spacing: 0.2em; color: var(--cinza); margin-bottom: 8px; }
 .kpis > div:nth-child(3) dd { color: var(--laranja); }
+.kpis--3 { grid-template-columns: repeat(3, 1fr); }
+.kpis--3 dd { font-size: clamp(2.4rem, 6vw, 4.4rem); }
 .ritmo { margin: 28px 0 0; font-size: 1.05rem; }
 .ritmo strong { background: var(--laranja-fundo); padding: 0 6px; }
 
@@ -204,4 +206,54 @@ h3 { font-stretch: 112%; font-weight: 800; font-size: 1.15rem; margin: 2.4rem 0 
   .topo { position: static; }
   .secao--escura { background: #fff; color: #000; }
   .secao { padding: 32px 0; break-inside: avoid; }
+}
+
+/* 1. Indicadores */
+.indicadores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0; border-top: 2px solid var(--preto); }
+.indicadores > div { padding: 24px 20px 24px 0; border-bottom: 1px solid var(--linha); }
+.indicadores > div:not(:nth-child(3n+1)) { padding-left: 20px; border-left: 1px solid var(--linha); }
+.indicadores dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cinza); font-weight: 600; margin-bottom: 10px; }
+.indicadores dd { margin: 0; font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+.indicadores span { display: block; color: var(--cinza); font-size: 0.9rem; margin-top: 6px; }
+.destaque--suave { background: var(--branco); border-left: 6px solid var(--laranja); font-weight: 400; display: block; max-width: 820px; }
+.secao--areia .destaque--suave { background: var(--branco); }
+#prazo .destaque--suave, #tempo .destaque--suave { margin-top: 28px; }
+
+/* 3. Áreas da equipe */
+.area { margin-bottom: 40px; }
+.area__cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; border-bottom: 2px solid var(--laranja); padding-bottom: 10px; margin-bottom: 0; }
+.area__cab h3 { margin: 0; font-stretch: 125%; font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
+.area__total { color: #CFCBC4; font-size: 0.9rem; }
+.area__total b { color: var(--laranja); font-size: 1.2rem; }
+.area .equipe { grid-template-columns: repeat(var(--n, 4), 1fr); background: transparent; border: 0; gap: 0; }
+.area .equipe > div { border: 1px solid #3A3A37; margin: 0 -1px -1px 0; }
+@media (max-width: 900px) { .area .equipe { grid-template-columns: repeat(2, 1fr); } .area .equipe > div:last-child:nth-child(odd) { grid-column: span 2; } }
+@media (max-width: 560px) { .area .equipe { grid-template-columns: 1fr; } .area .equipe > div:last-child:nth-child(odd) { grid-column: auto; } }
+.total-geral { background: var(--laranja); color: var(--preto); padding: 26px 22px; display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+.total-geral .equipe__frente { color: var(--preto); margin: 0; }
+.total-geral small { color: var(--preto) !important; }
+
+/* 6. Atividades e comparativo */
+.atividades { list-style: none; padding: 0; margin: 0 0 24px; max-width: 820px; }
+.atividades li { padding: 12px 0; border-bottom: 1px solid var(--linha); }
+.atividades b { font-stretch: 125%; font-weight: 900; color: var(--laranja); font-size: 1.3rem; margin-right: 8px; }
+.comparativo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 28px 0 8px; }
+.comp { border: 2px solid var(--preto); border-radius: var(--raio); padding: 22px; }
+.comp .equipe__frente { color: var(--laranja); }
+.comp b { display: block; font-size: 1.8rem; text-transform: uppercase; }
+.comp__n { display: block; font-size: 2.6rem; margin-top: 12px; color: var(--laranja); }
+.comp__n small { font-size: 0.85rem; font-stretch: 100%; font-weight: 500; color: var(--cinza); margin-left: 6px; }
+.comp p { margin: 6px 0 0; color: var(--cinza); font-size: 0.9rem; }
+.comp:last-child { border-color: var(--linha); }
+.comp:last-child .comp__n { color: var(--preto); }
+
+@media (max-width: 900px) {
+  .indicadores { grid-template-columns: repeat(2, 1fr); }
+  .indicadores > div { padding-left: 0 !important; border-left: 0 !important; }
+}
+@media (max-width: 560px) {
+  .indicadores, .comparativo { grid-template-columns: 1fr; }
+  .kpis--3 { grid-template-columns: repeat(3, 1fr); }
+  .kpis--3 > div { padding-right: 8px; }
+  .kpis--3 dd { font-size: 1.7rem; }
 }
