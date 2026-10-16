@@ -241,8 +241,7 @@
       <p>É a métrica correta para planejamento e prestação de contas: responde à pergunta “se eu abrir um novo polo, quantos versículos posso esperar dele por mês?” (orçamento, prazo, proposta a financiadores). A média simples (${fmt1(k.simplesPolo)}) é útil para comparar livros entre si; a ponderada é a correta para planejar capacidade e prever prazos.</p>`;
 
     set("tradutorFrase", `Considerando ${k.tpp} surdos tradutores por polo, a variação foi de ${fmt(k.pt.min)} (${lista(k.pt.minN)}) a ${fmt(k.pt.max)} (${lista(k.pt.maxN)}) versículos por mês. A média simples é de aproximadamente <strong>${fmt1(k.simplesTrad)}</strong> vers./mês/tradutor; a ponderada, de aproximadamente <strong>${fmt1(k.ponderadaTrad)}</strong>.`);
-    const diasUteis = 21 / k.ponderadaTrad; // ~21 dias úteis/mês
-    set("praticaFrase", `Na prática: cada surdo tradutor produziu cerca de 1 versículo a cada ${fmt1(diasUteis)} dias úteis.`);
+    set("praticaFrase", esc(cfg.frasePratica || ""));
 
     tabela(L, k);
     $("[data-obs]").innerHTML = (cfg.observacoes || []).map((o) => `<li>${esc(o)}</li>`).join("");
